@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Traco } from "../../components/ui/traco";
 import { ICredential } from "../../../@libs/types";
+import { AuthService } from "../../../services/auth-service";
 
 
 function SignInPage() {
@@ -22,7 +23,16 @@ function SignInPage() {
 
     setLoading(true);
 
-    //TO-DO: Implementar aqui
+    AuthService.signIn(credential)
+      .then(() => {
+        navigate('/');
+      })
+      .catch(error => {
+        console.log('PAU ', error)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }
 
   return (

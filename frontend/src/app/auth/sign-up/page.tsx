@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Traco } from "../../components/ui/traco";
 import { IUser } from "../../../@libs/types";
+import { AuthService } from "../../../services/auth-service";
 
 function SignUpPage() {
   const navigate = useNavigate();
@@ -21,7 +22,19 @@ function SignUpPage() {
     event.preventDefault();
 
     setLoading(true);
+
+    AuthService.signUp(user)
+      .then(() => {
+        navigate('/auth/sign-in')
+      })
+      .catch(error => {
+        console.log('PAU: ', error)
+      })
+      .finally(() => {
+        setLoading(false)
+      });   
   }
+
   return (
     <form onSubmit={handleSignUp}>
       <Stack
