@@ -1,5 +1,6 @@
 import { ReactNode, createContext, useEffect, useState } from "react";
 import { IUser } from "../@libs/types";
+import { AuthService } from "../services/auth-service";
 
 type AuthContextProps = {
     user: IUser | undefined;
@@ -16,7 +17,19 @@ export function AuthContextProvider(props: AuthContextProviderProps) {
     const [user, setUser] = useState<IUser>();
 
     useEffect(()=>{
-        //TO-DO: Recupera os valores da Local Storage        
+        AuthService.getUser()
+            .then(result => {
+                if (result) {
+                    setUser({
+                        uid: result.id,
+                        email: result.email || '',
+                        name: result.user_metadata?.name
+                    });
+                }
+            })
+            .catch(error => {
+                console.log('PAU: ', error);
+            })        
     }, [user]);
 
     return (

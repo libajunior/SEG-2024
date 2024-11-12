@@ -13,17 +13,28 @@ const signIn = async (credential: ICredential) => {
 }
 
 const signUp = async (user: IUser) => {
-
-  await supabase.auth.admin.createUser({
+  const {data, error} = await supabase.auth.admin.createUser({
     user_metadata: { name: user.name },
     email: user.email,
     password: user.password,
     email_confirm: true,
   });
 
+  if (error) throw error;
+
+  return data.user;
+}
+
+const getUser = async () => {
+  const {data, error} = await supabase.auth.getSession();
+
+  if (error) throw error;
+
+  return data.session?.user;
 }
 
 export const AuthService = {
   signIn,
-  signUp
+  signUp,
+  getUser
 }
