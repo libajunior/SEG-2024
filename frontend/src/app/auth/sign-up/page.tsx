@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Traco } from "../../components/ui/traco";
 import { IUser } from "../../../@libs/types";
 import { AuthService } from "../../../services/auth-service";
+import { toast } from "react-toastify";
 
 function SignUpPage() {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ function SignUpPage() {
         navigate('/auth/sign-in')
       })
       .catch(error => {
-        console.log('PAU: ', error)
+        toast.error(String(error))
       })
       .finally(() => {
         setLoading(false)
