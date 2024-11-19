@@ -29,13 +29,24 @@ function SignInPage() {
 
     AuthService.signIn(credential)
       .then(result => {
-        navigate('/');
 
-        setUser({
+        const currentUser = {
             uid: result.user.id,
             email: result.user.email || '',
             name: result.user.user_metadata?.name
-        });
+        };
+
+        AuthService.mfa.getFactorId()
+          .then(result => {
+            if (result.factorID) {
+              setFactorId(result.factorID);
+              navigate('/auth/two-factor', { replace: true  })
+            } else {
+              setUser(currentUser)
+              navigate('/', { replace: true  })
+            }
+          })
+        
       })
       .catch(() => {
         toast.error('Credencial inválida');

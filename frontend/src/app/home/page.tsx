@@ -1,8 +1,11 @@
-import { Button, Card, CardContent, Dialog, DialogContent, DialogTitle, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
+import { Avatar, Button, Card, CardContent, CardHeader, Chip, Dialog, DialogContent, DialogTitle, IconButton, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Tooltip, Typography } from "@mui/material";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { LoadingButton } from "@mui/lab";
+import CloseIcon from '@mui/icons-material/Close';
+import { AuthService } from "../../services/auth-service";
+import { toast } from "react-toastify";
 
 
 function HomePage() {
@@ -19,25 +22,78 @@ function HomePage() {
   }, []);
 
   const loadFactor = async () => {
-
+    AuthService.mfa.getFactorId()
+      .then(result => {
+        if (result.factorID) {
+          setHasVerified(true);
+          setFactorId(result.factorID);
+        }
+      })
+      .catch(error => {
+        toast.error(String(error));
+      });
   }
 
   const handleConfigure = async () => {
+    AuthService.mfa.configure()
+      .then(result => {
+        if (result) {
+          setFactorId(result.id);
 
+          if (result.totp) {
+            const { qr_code } = result.totp;
+            setQrCode(qr_code);
+            setOpenDialog(true);
+          }
+        }
+      })
+      .catch(error => {
+        toast.error(String(error));
+      });
   }
 
   const handleVerify = async () => {
 
+    setLoading(true);
+
+    AuthService.mfa.verifyCode(factorId, verifiedCode)
+      .then(result => {
+        if (result.user && result.user.factors) {
+          if (result.user.factors[0].status == 'verified') {
+            toast.success('Auntenticação Dois Fatores Habilitada');
+            setHasVerified(true);
+            setOpenDialog(false);
+          }
+        }
+      })
+      .catch(() => {
+        toast.error('Código inválido!');
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+
   }
 
   const handleRemove = async () => {
-    // AuthService.mfa.remove(factorId)
-    //   .then(result => {
-    //     if (result) setHasVerified(false);
-    //   })
-    //   .catch(error => {
-    //     toast.error(String(error))
-    //   });
+    AuthService.mfa.remove(factorId)
+      .then(result => {
+        if (result) setHasVerified(false);
+      })
+      .catch(error => {
+        toast.error(String(error))
+      });
+  }
+
+  const handleSignOut = () => {
+    AuthService.signOut()
+      .then(() => {
+        setUser(null);
+        navigate('/auth/sign-in', { replace: true })
+      })
+      .catch(error => {
+        toast.error(String(error));
+      });
   }
 
   return (

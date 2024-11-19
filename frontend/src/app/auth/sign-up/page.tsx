@@ -26,6 +26,7 @@ function SignUpPage() {
 
     AuthService.signUp(user)
       .then(() => {
+        toast.success('Conta criada com sucesso!')
         navigate('/auth/sign-in')
       })
       .catch(error => {
